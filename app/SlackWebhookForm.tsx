@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { sendToSlack } from './actions'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { AlertCircle, Loader2, Send, Paperclip } from "lucide-react"
+import { AlertCircle, Loader2, Send } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -33,20 +32,16 @@ function SubmitButton() {
 
 export default function SlackWebhookForm() {
   const [message, setMessage] = useState('')
-  const [file, setFile] = useState<File | null>(null)
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(formData: FormData) {
     try {
+      setResult(null) // Reset previous result
       const result = await sendToSlack(formData)
+      console.log('Server response:', result)
       setResult(result)
       if (result.success) {
         setMessage('')
-        setFile(null)
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''
-        }
       }
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -61,7 +56,7 @@ export default function SlackWebhookForm() {
     <Card className="w-full max-w-md mx-auto mt-8">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center text-primary">Slack Connect</CardTitle>
-        <CardDescription className="text-center">スタイリッシュにSlackへメッセージを送信</CardDescription>
+        <CardDescription className="text-center">Slackへメッセージを送信</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={handleSubmit} className="space-y-4">
@@ -76,32 +71,6 @@ export default function SlackWebhookForm() {
               required
               className="w-full min-h-[100px]"
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="file">添付ファイル</Label>
-            <div className="flex items-center space-x-2">
-              <Input
-                id="file"
-                name="file"
-                type="file"
-                ref={fileInputRef}
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="w-full"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Paperclip className="h-4 w-4" />
-              </Button>
-            </div>
-            {file && (
-              <p className="text-sm text-muted-foreground">
-                選択されたファイル: {file.name}
-              </p>
-            )}
           </div>
           <SubmitButton />
         </form>

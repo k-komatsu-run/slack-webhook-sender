@@ -4,24 +4,18 @@ import { revalidatePath } from 'next/cache'
 
 export async function sendToSlack(formData: FormData) {
   try {
-    const message = formData.get('message') as string
-    const file = formData.get('file') as File | null
+    const message = formData.get('message')
+    if (typeof message !== 'string' || message.trim() === '') {
+      throw new Error('Message is required')
+    }
 
     const webhookUrl = process.env.SLACK_WEBHOOK_URL
-
     if (!webhookUrl) {
       throw new Error('Slack Webhook URL is not configured')
     }
 
-    let fileUrl = ''
-    if (file && file.size > 0) {
-      console.log(`File would be uploaded: ${file.name}`)
-      fileUrl = `https://example.com/uploaded-file-${file.name}`
-    }
-
     const payload = {
       text: message,
-      attachments: fileUrl ? [{ image_url: fileUrl }] : [],
     }
 
     console.log('Sending payload to Slack:', JSON.stringify(payload))
@@ -34,8 +28,10 @@ export async function sendToSlack(formData: FormData) {
       body: JSON.stringify(payload),
     })
 
+    const responseText = await response.text()
+    console.log('Slack API response:', response.status, responseText)
+
     if (!response.ok) {
-      const responseText = await response.text()
       throw new Error(`Failed to send message to Slack: ${response.status} ${response.statusText}\n${responseText}`)
     }
 
