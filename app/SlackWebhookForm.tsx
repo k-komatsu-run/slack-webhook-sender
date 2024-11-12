@@ -50,7 +50,10 @@ export default function SlackWebhookForm() {
       }
     } catch (error) {
       console.error('Error submitting form:', error)
-      setResult({ success: false, message: 'An unexpected error occurred. Please try again.' })
+      setResult({ 
+        success: false, 
+        message: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`
+      })
     }
   }
 

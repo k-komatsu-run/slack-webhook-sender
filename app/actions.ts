@@ -15,7 +15,6 @@ export async function sendToSlack(formData: FormData) {
 
     let fileUrl = ''
     if (file && file.size > 0) {
-      // ファイルアップロードのロジックをここに実装
       console.log(`File would be uploaded: ${file.name}`)
       fileUrl = `https://example.com/uploaded-file-${file.name}`
     }
@@ -36,7 +35,8 @@ export async function sendToSlack(formData: FormData) {
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to send message to Slack: ${response.statusText}`)
+      const responseText = await response.text()
+      throw new Error(`Failed to send message to Slack: ${response.status} ${response.statusText}\n${responseText}`)
     }
 
     console.log('Message sent successfully')
