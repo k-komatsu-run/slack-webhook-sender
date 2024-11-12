@@ -38,14 +38,19 @@ export default function SlackWebhookForm() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(formData: FormData) {
-    const result = await sendToSlack(formData)
-    setResult(result)
-    if (result.success) {
-      setMessage('')
-      setFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+    try {
+      const result = await sendToSlack(formData)
+      setResult(result)
+      if (result.success) {
+        setMessage('')
+        setFile(null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
       }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      setResult({ success: false, message: 'An unexpected error occurred. Please try again.' })
     }
   }
 
